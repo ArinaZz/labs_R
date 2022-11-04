@@ -1,0 +1,43 @@
+---
+title: "Lab 1. Part 1"
+author: "Zykova Arina"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Function: 
+```{r echo=TRUE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+fix_data <- function(df) {
+  
+  apply_to_column <- function(original_column) {
+    replaced_column <- sub(' ', '', original_column)
+    numeric_column <- as.numeric(replaced_column)
+    
+    if (any(is.na(numeric_column))) {
+      return(original_column)
+    }
+    
+    return(numeric_column)
+  }
+  
+  return(data.frame(lapply(df, apply_to_column)))
+}
+```
+
+
+Read file:
+```{r echo=TRUE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+data <- read.csv("lab1_e1.csv")
+```
+
+Before:
+```{r echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+data
+```
+After:
+```{r echo=TRUE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+fix_data(data)
+```

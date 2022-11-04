@@ -1,0 +1,35 @@
+---
+title: "Lab 1. Part 2"
+author: "Zykova Arina"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Function: 
+```{r echo=TRUE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+merge_dataframe_list <- function(all_data) {
+  return(Reduce(function(x, y) merge(x, y, by = 'id'), all_data))
+}
+
+
+get_id <- function(dfs) {
+  merged = merge_dataframe_list(all_data)
+  measurements = merged[-which(colnames(merged)=='id')]
+  means = rowMeans(measurements)
+  return(data.frame(id=merged$id, mean_temp=means))
+}
+```
+
+
+Read data:
+```{r}
+load("lab1_e2.RData")
+```
+
+Output result:
+```{r echo=TRUE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+get_id(data)
+```
