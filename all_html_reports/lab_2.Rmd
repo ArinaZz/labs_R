@@ -1,0 +1,98 @@
+---
+title: "Лабораторная работа 2"
+author: "Zykova Arina"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+### Вариант 8.
+Используйте файл RH_T.csv Найдите самую жаркую неделю 2020 года в Екатеринбурге (Средняя температура в течение недели максимальна. Неполные недели в начале и в конце года не считаем).
+
+
+Function: 
+```{r echo=TRUE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+getmaxAvg_week <- function (data) {
+  max_Temp <- -220
+  hottest_Week <- -1
+  temp_count <- 0
+  week_count <- 0
+  for (row in seq_len(nrow(data))) {
+
+    # Переводим значение даты из таблицы в словесный формат
+    day_Week <- weekdays(as.Date(data[row, "YYYYMMDD"]))
+    temp_count <- temp_count + data[row, "T2M"]
+    
+    # Определяем начало недели
+    if (day_Week == "понедельник" ) {
+      if (hottest_Week == -1) hottest_Week <- 1
+      else {
+        
+        # Сравниваем максимальное среднее с получившемся текущим средним
+        if (max_Temp < temp_count/7) {
+          hottest_Week <- week_count
+          max_Temp <- temp_count/7
+        }
+        temp_count <- 0
+      }
+      week_count <- week_count + 1
+    }
+  }
+  return(hottest_Week)
+}
+
+file <- "RH_T.csv"
+data <- read.csv(file)
+```
+
+Results:
+```{r echo=TRUE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+getmaxAvg_week(data)
+```
+
+
+
+### Вариант 23.
+Используйте файл Payment_and_value_of_Care-Hospital.csv Напишите функцию, которая на вход принимает название города, округа или штата, а на выход выдает количество больниц в нем и процент больниц, в которых есть служба экстренной медицинской помощи. Если значение переданное на вход функции не является городом, округом или штатом, то должно функция должна выдавать соответствующее сообщение об ошибке. Обратите внимание, что функция должна принимать на вход только одно значение.
+
+
+Function: 
+```{r echo=TRUE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+get_count_hospitals_location <- function(location, data) {
+  location_id <- data[data$City == location, "Facility.Name"]
+  if (length(location_id) == 0) {
+    location_id <- data[data$State == location, "Facility.Name"]
+  }
+  if (length(location_id) == 0) {
+    location_id <- data[data$County.Name == location, "Facility.Name"]
+  }
+  
+  # Выводим ошибку если не нашли совпадений
+  if (length(location_id) == 0) {
+    return("Error! You write an incorrect location!")
+  }
+  
+  quantity_of_hospitals <- list()
+  quantity_of_hospitals <- length(unique(location_id))
+  
+  return(quantity_of_hospitals)
+}
+
+file <- "Payment_and_Value_of_Care-Hospital.csv"
+data <- read.csv(file)
+```
+
+Results:
+```{r echo=TRUE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+# Проверка города
+get_count_hospitals_location('FLORENCE', data)
+# Проверка штата
+get_count_hospitals_location('AL', data)
+# Проверка округа
+get_count_hospitals_location('CAMDEN', data)
+# Проверка неккоректного ввода
+get_count_hospitals_location('Non-existent place', data)
+```

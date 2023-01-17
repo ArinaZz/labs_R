@@ -1,0 +1,745 @@
+---
+title: "R base"
+output:
+    ioslides_presentation: default
+    slide_presentation:  default
+---
+## About R
+<img src="pics/rbase1-1-1.png" width="800" height=400"/>
+
+##
+__Типы данных:__
+
+- _logical_ (TRUE/FALSE)
+- _integer_ ( целые числа)
+- _numeric/double_ (числа с плавающей точкой)
+- _complex_ (комплексные числа)
+- _character_ (строки)
+- _raw_ (байтовые последовательности)
+
+##
+__Базовые структуры данных__
+
+- _вектор_
+- _матрица_
+- _список_
+- _data.frame_
+
+##
+__Вектор__ - _индексированная последовательность элементов одного типа_
+```{r}
+a <- c(2,3,4)
+typeof(a)
+```
+
+```{r}
+b <- as.character(a)
+is.character(b)
+```
+##
+__Вектор (продолжение)__
+```{r}
+a <- vector(length = 3)
+typeof(a)
+a[1] <- 2
+a[2] <- 3
+a[3] <- 4
+typeof(a)
+```
+##
+__Вектор (продолжение)__
+
+_Естественное приведение типов_: _logical_ – _integer_ – _double_ - _character_
+```{r}
+v = c('one', 'two', 3, TRUE)
+typeof(v)
+```
+
+##
+__Последовательности__
+```{r}
+2:10
+```
+```{r}
+seq(2, 10, by = 1.5)
+```
+```{r}
+seq(2, 10, length = 3)
+```
+##
+__Последовательности (продолжение)__
+```{r}
+rep(1:3, times = 3)
+```
+```{r}
+rep(1:3, each = 4)
+```
+```{r}
+rep(1:3, length.out = 5)
+```
+
+##
+__Именованный вектор__
+```{r}
+a <- c(uno = 1, dos = 2, 'new' = 3, 4)
+names(a)
+names(a) <- NA
+```
+##
+__Векторизованные операции__
+
+(большинство базовых операций применяется поэлементно)
+
+```{r}
+a <- 1:4
+a ^ 2
+```
+
+```{r}
+b <- 2:5
+a * b
+c(a,a) + b
+```
+
+
+##
+__Индексирование векторов__
+```{r}
+x <- seq(10, 100, by = 10)
+```
+
+```{r}
+x[3:5]
+```
+
+```{r}
+x[-3:-5]
+```
+
+##
+__Логические индексы__
+
+```{r}
+x[rep(c(TRUE, FALSE), 5)]
+
+x[x  > 77 & x < 99]
+```
+
+##
+__Мартрицы__
+
+```{r}
+matrix(1:6, nrow = 2, ncol = 3, byrow = TRUE)
+matrix(1:6, nrow = 2)
+```
+
+##
+__Атрибут dim__
+```{r}
+m <- matrix(1:6, nrow = 2)
+dim(m) <- NULL
+m
+
+dim(m) <- c(3, 2)
+m
+```
+
+##
+_операторы (+, -, *, /) действуют поэлементно_
+
+```{r}
+m1 = matrix(1:10, nrow = 2)
+m2 = matrix(2:11, nrow = 2)
+m1 * m2
+```
+
+##
+_Полезные функции для матриц_
+
+- rbind() / cbind() – функции присоединения матриц по строкам / столбцам
+- rowSums() / colSums() – суммирование по строкам / столбцам
+ - rowMeans() / colMeans() - средние значения по строкам / столбцам
+```{r}
+m1 = matrix(1:10, nrow = 2)
+m2 = matrix(2:11, nrow = 2)
+rbind(m1, m2)
+cbind(m1, m2)
+```
+
+##
+__apply()__
+```{r}
+m = matrix(1:15, ncol = 3)
+apply(m, MARGIN = 2, sum)
+apply(m, MARGIN = 1:2, sum)
+```
+
+##
+__Именованные матрицы__
+```{r}
+m <- matrix(1:10, ncol = 5)
+rownames(m) <- c("row1", "row2")
+colnames(m) <- paste0("column", 1:5)
+m
+```
+
+##
+__Список__ - *индексированная последовательность*
+
+```{r}
+list(1:2, '../data', matrix(1, nrow=2, ncol=2))
+list(uno = 'uno', second = 2, 4:5, fourth = matrix(1, nrow = 2, ncol = 2))
+```
+
+
+##
+__Конкатенация списков__
+
+```{r}
+l1 = list(uno = 'uno', second = 2, 4:5, fourth = matrix(1, nrow = 2, ncol = 2))
+l2 = list(first = 'first', 7:8 )
+c(l1, l2)
+```
+
+
+
+##
+__Доступ к элементам списка__
+
+```{r}
+l1[1]
+l1[[1]]
+l1$uno
+```
+
+##
+__lappy()__
+
+
+```{r}
+lapply(l1, length)
+```
+
+##
+__DataFrame__
+- таблица из наблюдейний и переменных
+
+```{r}
+df = data.frame(x = 1:4, y = LETTERS[1:4], z = c(T, F))
+head(df)
+str(df)
+```
+
+##
+__Атрибуты как у матриц__
+
+```{r}
+nrow(df)
+ncol(df)
+dim(df)
+colnames(df)
+rownames(df)
+```
+##
+__Атрибуты как у списков__
+
+```{r}
+length(df)
+names(df)
+```
+
+##
+__Индексация, как у матриц__
+
+
+```{r}
+df[3:4, -1]
+```
+
+
+```{r}
+df[c(T, F), c("z", "x")]
+```
+
+##
+__Индексация как у списков__
+
+
+```{r}
+df$z
+```
+
+
+```{r}
+df[[3]]
+```
+
+```{r}
+df[["z"]]
+```
+
+
+```{r}
+df[df$x>2, 1:2]
+```
+
+##
+__cbind, rbind vs merge__
+```{r}
+df1 = data.frame(id = id <- 1:3, letter1 = LETTERS[id])
+df2 = data.frame(id = id+1, letter2 = LETTERS[2*id])
+cbind(df1, df2, by = 'id')
+merge(df1, df2, by = 'id')
+```
+
+##
+__Работа с директориями__
+#### getwd() - возвращает текущую директорию
+```{r}
+getwd()
+```
+#### setwd() - функция смены рабочей директории
+
+`r
+setwd('C:/Users/mary_/Documents/lectures')
+`
+#### функция file.show()
+
+```{r}
+file.show('../../../Documents/lectures/soy_phens.txt')
+```
+
+##
+__Импорт/экспорт данных__
+
+#### импорт
+- структурированные (read.table, read.csv, ...)
+- неструктурированные (readLines, scan)
+#### экспорт
+- write.table, write.csv
+
+##
+__Почему при импорте data.table числовые типы становытся строковыми?__
+- из-за пропущенных значений, отмеченных не как NA na.string("NA")
+- из-за неверно указанного разделителя sep = ",", dec = "."
+- из-за ковычек сопроводительного текста или комментариев quote, comment.char, skip
+
+
+##
+__Управляющие конструкции__
+
+```{r}
+a <- 10
+if (a > 10){
+    print('a > 10')
+} else {
+    print("a <= 10")
+}
+```
+
+```{r}
+for (i in 1:5) print(i)
+```
+
+##
+__Создание функций__
+```{r}
+add_two <- function(x){
+    return(x + 2)
+}
+
+add_two(a)
+```
+
+##
+***Strings***
+
+- для замены первой совпадающей подстроки в строке используется *sub(old, new, string)*
+- для замены всех совпадающих подстрок в строке используется *gsub(old, new, string)*
+
+```{r}
+s <- "Curly is the smart one. Curly is funny, too."
+sub("Curly", "Moe", s)
+gsub("Curly", "Moe", s)
+```
+
+
+##
+***Enviroment***
+
+<img src="pics/env.jpg">
+
+- создание объекта означает сохранение его в какой-то среде *enviroment*
+- объекты созданные из консоли сохраняются в *global enviroment*( *рабочем пространстве*)
+- если в какой-то среде запускается функция, то создается новая среда, дочерняя по отношению к к той среде, в которой эта функций создана
+- среда, в которой в данный момент происходит выполнение программы называется *current enviroment*
+
+##
+***Enviroment***
+<img src="pics/env.jpg">
+
+Доступные среды
+```{r}
+rlang::search_envs()
+```
+
+
+##
+***Enviroment***
+
+```{r}
+#rlang::search_envs()
+f <- function(f_x){
+  g <- function(g_x){
+    z <- 6
+    print(environment())
+    print(rlang::env_parent())
+  }
+  l <- 5
+  g(5)
+  print(environment())
+  print(rlang::env_parent())
+}
+f()
+```
+
+
+##
+***Enviroment***
+
+*Оператор присваивания <<- *
+
+- '<-' всегда создает значение в текущей среде (current env)
+
+- '<<-' не создает значение в текущей среде, но создает значение в родительской среде (parent env)
+```{r}
+rm(list = ls())
+l = 4
+t <- function(x,y) x <- x/2
+z = t(l)
+ls.str()
+t <- function(x,y) x <<- x/2
+z = t(l)
+ls.str()
+```
+
+##
+***Enviroment***
+
+Cреда похожа на список и отличается от него тем, что
+
+  - имена уникальны
+  - имена не упорядочены
+  - каждая среда имеет родительскую среду (кроме empty enviroment)
+  - не копируются при изменении (modify in place)
+
+##
+***modify in place***
+```{r}
+e1 <- rlang::env(a = 1, b = 2, c = 3)
+e2 <- e1
+e1$c <- 4
+ls.str(e1)
+ls.str(e2)
+```
+
+##
+***copy-on-modify***
+```{r}
+e1 <- rlang::env(a = 1, b = 2, c = 3)
+list_e1 <- as.list(e1)
+list_e2 <- list_e1
+list_e1$c <- 4
+list_e1
+list_e2
+```
+
+##
+***Аттрибуты***
+
+- пары имя-значение, закрепленные за объектами (именованный список метаданных)
+- *attributes()* - список атрибутов обекта
+- *attr()* - изменение атрибута объекта
+- *structure()* - создание объекта вместе с атрибутами
+
+```{r}
+a <- 1:3
+attributes(a)
+
+attr(a, "x") <- "abcdef"
+attributes(a)
+```
+
+
+##
+***Аттрибуты***
+
+- пары имя-значение, закрепленные за объектами (именованный список метаданных)
+- *attributes()* - список атрибутов обекта
+- *attr()* - изменение атрибута объекта
+- *structure()* - создание объекта вместе с атрибутами
+
+```{r}
+a <- structure(
+  1:3,
+  x = "abcdef")
+attributes(a)
+```
+
+
+##
+***Аттрибуты, которые можно добавить вектору***
+
+- name
+- dim (переводит вектор в матрицу)
+- class (переводит вектор S3 объект)
+
+
+```{r}
+a <- 2:7
+attr(a,"dim") <- c(2, 3)
+a
+
+a <- 1:3
+attr(a, "names") <- c("one", "two", "three")
+a
+```
+
+
+
+##
+***Аттрибуты, которые можно добавить в списку***
+
+- row.names
+- class
+
+
+```{r}
+depots = data.frame(
+  depot = c('Северное', 'Черкизово', 'Сокол', 'Замоскворецкое',
+            'Братеево', 'Измайлово', 'Фили', 'Митино',
+            'Красная Пресня', 'Калужское', 'Свиблово'),
+  year_opened = c(1935, 1990, 1938, 1969,
+                  2014, 1950, 1962, 2016,
+                  1954, 1962, 1978),
+  line_number = c(1, 1, 2, 2, 2, 3, 3, 3, 5, 6, 6)
+)
+typeof(depots)
+attributes(depots)
+```
+
+
+##
+***S3 - объекты***
+
+В основе *S3-объектов* лежат *объекты базовых типов* ( их 25), к котором добавлены еще какие-то аттрибуты
+
+***Базовые типы R***
+
+- NULL (NULLSXP)
+- [векторы] logical (LGLSXP),  integer (INTSXP), double (REALSXP), complex (CPLSXP), character (STRSXP),  raw (RAWSXP)
+- list (VECSXP)
+- [функции] closure (regular R functions, CLOSXP), special (internal functions, SPECIALSXP), builtin (primitive functions, BUILTINSXP)
+- environment (ENVSXP)
+- S4 type (S4SXP)
+- ...
+
+
+##
+***S3 - objects: Factor***
+
+- базовый тип *integer*
+- используется для хранения категориальных данных
+
+```{r}
+x <- factor(c("a", "b", "b", "a"))
+x
+typeof(x)
+attributes(x)
+```
+
+##
+***S3 - objects: Factor***
+
+```{r}
+sex_char <- c("m", "m", "m")
+sex_factor <- factor(sex_char, levels = c("m", "f"))
+table(sex_char)
+table(sex_factor)
+```
+
+##
+***S3 - objects: Factor***
+
+Фрейм данных с электродепо по интересующим нас веткам метро:
+```{r}
+depots = data.frame(
+  depot = c('Северное', 'Черкизово', 'Сокол', 'Замоскворецкое',
+            'Братеево', 'Измайлово', 'Фили', 'Митино',
+            'Красная Пресня', 'Калужское', 'Свиблово'),
+  year_opened = c(1935, 1990, 1938, 1969,
+                  2014, 1950, 1962, 2016,
+                  1954, 1962, 1978),
+  line_number = c(1, 1, 2, 2, 2, 3, 3, 3, 5, 6, 6)
+)
+depots
+```
+
+##
+***S3 - objects: Date***
+
+- базовый тип *double*
+
+```{r}
+today <- Sys.Date()
+today
+typeof(today)
+attributes(today)
+unclass(today) # number of days since 1970-01-01
+```
+
+
+
+##
+***S3 - objects: Date-time***
+
+
+- _POSIXct_
+- по умолчанию, базовый тип *double*
+
+- _POSIXlt_
+- базовый тип *list*
+
+
+##
+***S3 - objects: Date-time***
+
+
+- _POSIXct_
+
+```{r}
+today <- Sys.time()
+today
+typeof(today)
+attributes(today)
+unclass(today) # number of secs since 1970-01-01 03:00:00
+```
+
+##
+***S3 - objects: Date-time***
+
+
+- _POSIXlt_
+
+```{r}
+today <- as.POSIXlt(Sys.time())
+today
+typeof(today)
+```
+
+
+##
+***S3 - objects: Date-time***
+
+
+- _POSIXlt_
+
+```{r}
+today <- as.POSIXlt(Sys.time())
+today
+attributes(today)
+
+```
+
+##
+***S3 - objects: Date-time***
+
+
+- _POSIXlt_
+
+```{r}
+today <- as.POSIXlt(Sys.time())
+today
+
+unclass(today)
+```
+
+
+##
+***S3 - objects: Date-time***
+
+
+- _POSIXlt_
+
+```{r}
+today <- as.POSIXlt(Sys.time())
+today
+today$mon <- today$mon + 1
+today
+```
+
+##
+***S3 - objects: duration***
+
+- базовый тип *double*
+
+```{r}
+Sys.time()
+Sys.Date()
+dif <- difftime(Sys.time(), Sys.Date(), units = "hours")
+typeof(dif)
+attributes(dif)
+```
+
+
+##
+***S3 - objects: duration***
+
+- базовый тип *double*
+
+```{r}
+one_week_1 <- as.difftime(1, units = "weeks")
+one_week_1
+typeof(one_week_1)
+attributes(one_week_1)
+```
+
+
+##
+*Date-time* to *String*
+
+ - *format()*
+ - *as.character()*
+
+```{r}
+format(Sys.time())
+as.character(Sys.time())
+format(Sys.Date(), format="%m/%d/%Y")
+as.character(Sys.Date(), format="%m/%d/%Y")
+```
+
+*String* to *Date-time*
+
+- ISOdate(year, month, day)
+
+```{r}
+ISOdate(2012,2,29)
+```
+
+## Факторы
+- категориальные данные
+
+```{r}
+ff <- factor(substring("statistics", 1:10, 1:10), levels = letters)
+ff
+```
+```{r}
+as.integer(ff)
+```
+
+## Факторы
+```{r}
+df = read.table('../../../Documents/lectures/soy_phens.txt', sep = '\t', header = TRUE)
+str(df)
+```
+

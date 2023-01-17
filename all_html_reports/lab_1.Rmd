@@ -1,0 +1,121 @@
+---
+title: "Lab 1"
+author: "Zykova Arina"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Файлы с данными содержатся в каталоге data.
+
+### Задание 1.
+Файл с данными lab1_e1.csv. Мы видим, что в некоторых значениях числовых
+переменных добавлен пробел между цифрами. В результате R определит такие переменные
+как строку (или как фактор по умолчанию). Ваша задача написать функцию fix_data, которая
+полу
+чает на вход набор данных, у которого в некоторых значениях числовых переменных
+добавлен пробел между цифрами. Ваша задача
+-
+избавиться от этого пробела и вернуть
+числовым переменным их числовой тип. Функция должна возвращать преобразованный
+набор данных,
+в котором все числовые переменные будут переведены в числовой тип, при
+этом те переменные, которые действительно являются строковыми (например, V2 и V4) никак
+преобразовывать не надо.
+
+
+Function: 
+```{r echo=TRUE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+fix_data <- function(df) {
+  
+  apply_to_column <- function(original_column) {
+    replaced_column <- sub(' ', '', original_column)
+    numeric_column <- as.numeric(replaced_column)
+    
+    if (any(is.na(numeric_column))) {
+      return(original_column)
+    }
+    
+    return(numeric_column)
+  }
+  
+  return(data.frame(lapply(df, apply_to_column)))
+}
+```
+
+
+Read file:
+```{r echo=TRUE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+data <- read.csv("lab1_e1.csv")
+```
+
+Before:
+```{r echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+data
+```
+After:
+```{r echo=TRUE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+fix_data(data)
+```
+
+
+
+### Задание 2.
+Файл с данными lab1_e2.Rdata. Допустим, в рамках некоторого
+медицинского исследования
+тестировалась эффективность новой вакцины от вируса гриппа. Одной из целей исследования
+являлось изучить динамику температуры тела пациентов на протяжении недели после
+вакцинации.
+Пациенты должны были каждый день приходить на осмо
+тр, где у них измеряли температуру.
+Каждый из семи дней экспериментатор вносил в таблицу id пациента и его температуру. После
+окончания исследования выяснилось, что некоторые пациенты не смогли посетить все семь
+приемов. Кто - то после первого раза больше не приходил на обследование, кто - то пропустил
+некоторые дни и т.д.
+Для чистоты исследования врачам необходимо отобрать из всех пациентов только тех, кто
+посетили каждый из семи приемов.
+Все данные хранятся в следующем формате: в списке all_data сохранены се
+мь датафреймов, с
+двумя колонками:
+
+1. id - закодированное имя пациента
+2. temp - значения температуры.
+
+Ваша задача написать функцию get_id, которая получает на
+вход такого рода список, состоящий из семи датафрэймов. Функция, должна вернуть новый
+датаф
+рэйм, в котором будут две переменные id и mean_temp
+-
+среднее значение температуры
+за неделю только тех пациентов, которые посетили все семь приемов, то есть id таких
+пациентов присутствует в каждом из семи датафреймов.
+
+
+
+Function: 
+```{r echo=TRUE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+merge_dataframe_list <- function(all_data) {
+  return(Reduce(function(x, y) merge(x, y, by = 'id'), all_data))
+}
+
+
+get_id <- function(dfs) {
+  merged = merge_dataframe_list(all_data)
+  measurements = merged[-which(colnames(merged)=='id')]
+  means = rowMeans(measurements)
+  return(data.frame(id=merged$id, mean_temp=means))
+}
+```
+
+
+Read data:
+```{r}
+load("lab1_e2.RData")
+```
+
+Output result:
+```{r echo=TRUE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+get_id(data)
+```

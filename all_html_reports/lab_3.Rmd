@@ -1,0 +1,184 @@
+---
+title: "Лабораторная работа 3"
+author: "Zykova Arina"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+### Вариант 8.
+ExpImp.Rdata Приведите данные к формату tidydata. Отобразите значения суммарного экспорта и импорта металлургической промышленности по регионам в виде столбчатой диаграммы [сгруппировав значения по названию региона]. Подпишите группы товаров, экспорт и импорт обозначьте разными цветами. Сделайте второй график, на котором значения экспорта и импорта расположите по разные стороны относительно оси x. Подпишите значения экспорта и импорта и долю, которую экспорт и импорт металлургической промышленности сотавляет в суммарном импорте и экспорте по регионам.
+
+Packages: 
+```{r echo=TRUE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+library("ggplot2")
+library("dplyr")
+library("tidyverse")
+```
+
+Function: 
+```{r echo=TRUE, error=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+#функция для преобразования данных в формат tidydata и очищение их от ненужных символов и приведение в более удобный формат
+get_tidy_data <- function() {
+  #подфункция для объединения данных одного вида промышленности в один столбец через разделитель "_"
+  unite_and_imp_cargo_data <- function(source_tib) {
+    tidy_data <- source_tib %>% unite("Продовольственный", "ПродЭкспорт", "ПродИмпорт", sep=exp_imp_sep)
+    tidy_data <- tidy_data %>% unite("ТЭК", "ТЭКЭкспорт", "ТЭКИмпорт", sep=exp_imp_sep)
+    tidy_data <- tidy_data %>% unite("Химический", "ХимЭкспорт", "ХимИмпорт", sep=exp_imp_sep)
+    tidy_data <- tidy_data %>% unite("Древесный", "ДревЭкспорт", "ДревИмпорт", sep=exp_imp_sep)
+    tidy_data <- tidy_data %>% unite("Металлургический", "МетЭкспорт", "МетИмпорт", sep=exp_imp_sep)
+    tidy_data <- tidy_data %>% unite("Машиностроение", "МашЭкспорт", "МашИмпорт", sep=exp_imp_sep)
+    return(tidy_data)
+  }
+  
+  load(file='ExpImp.RData')
+  data = ExpImp
+  #очищаем наши данные от ненужных символов и строк
+  data <- data  %>% mutate_all(funs(gsub("-", "0", .)))
+  data <- data  %>% mutate_all(coalesce, "0") %>% filter(!str_detect(ExpImp$Регион, 
+                                                                     'Федерация|федеральный округ|в том числе'))
+  
+  exp_imp_sep <- "_"
+  tidy_data <- unite_and_imp_cargo_data(data)
+  #переводим наши данные из wide в long формат
+  tidy_data <- tidy_data %>% pivot_longer(c("Продовольственный",
+                                            "ТЭК",
+                                            "Химический",
+                                            "Древесный",
+                                            "Металлургический",
+                                            "Машиностроение"),
+                                          names_to="Груз",
+                                          values_to="Экспорт_Импорт")
+  #разделяем данные на импорт и экспорт
+  tidy_data <- tidy_data %>% separate("Экспорт_Импорт",
+                                      into=c("Экспорт", "Импорт"),
+                                      sep=exp_imp_sep)
+  #добавляем столбцы с переменными отвечающими за Объем и Операции
+  tidy_data <- tidy_data %>% pivot_longer(c("Экспорт", "Импорт"),
+                                          names_to="Операция",
+                                          values_to="Объём")
+  return(tidy_data)
+}
+
+
+#функция для построения первой диаграммы
+my_chart_1 <- function(tidy_data) {
+  #подфункция для замены данных в пустых ячейках на ноль  
+  replace_NA_by_null <- function() {
+    ind <- 1
+    while (ind <= nrow(metall_data)) {
+      if (metall_data$`Объём`[ind] == "-") {
+        metall_data$`Объём`[ind] <<- "0"
+      }
+      ind <- ind + 1
+    }
+  }
+  
+  #отбираем данные о металлургической промышленности
+  metall_data <- tidy_data %>% filter(Груз=="Металлургический")
+  replace_NA_by_null()
+  #создаем переменную типа ggplot, отвечающую за построение графика, указываем что будем использовать за данные в графике, и какие столбцы будут изображены на осях
+  my_plot <- ggplot(data=metall_data,
+                    aes(x=`Регион`, y=as.numeric(metall_data$`Объём`), 
+                        fill=`Операция`))
+  
+  #задаем такое условие, чтобы при регулировки горизонтального положения графика у нас сохранялось вертикальное
+  my_plot <- my_plot + geom_col(position="Dodge")
+  my_plot <- my_plot + scale_fill_manual(labels = c("Импорт", "Экспорт"), values = c("blue", "orange"))
+  #задаем названия графику и осям координат 
+  my_plot <- my_plot + labs(title="Суммарный экспорт и импорт металлургической продукции в субъектах РФ",
+                            x="Субъект РФ",
+                            y="Объем, млн долл. США")
+  #поворачиваем график для более удобного отображения даннных
+  my_plot <- my_plot + coord_flip()
+  return(my_plot)
+}
+
+
+#функция для построения второй диаграммы
+my_chart_2 <- function(tidy_data) {
+  replace_NA_by_null <- function() {
+    ind <- 1
+    while (ind <= nrow(metall_data)) {
+      if (metall_data$`Объём`[ind] == "-") {
+        metall_data$`Объём`[ind] <<- "0"
+      }
+      ind <- ind + 1
+    }
+  }
+  
+  #функция для получения вектора с количеством импорта, экспорта и его доли для определенного региона
+  get_percents_and_reverse_import <- function() {
+    #подсчитываем суммарный экспорт по всем регионам 
+    exports <- metall_data %>% filter(Операция=="Экспорт")
+    sum_export <- sum( as.numeric(exports$`Объём`) )
+    
+    #подсчитываем суммарный импорт по всем регионам
+    imports <- metall_data %>% filter(Операция=="Импорт")
+    sum_import <- sum( as.numeric(imports$`Объём`) )
+    
+    percents <- vector("character", 0)
+    ind = 1
+    while (ind <= nrow(metall_data)) {
+      #записываем либо импорт либо экспорт конкретного регионам
+      amount <- as.numeric(metall_data$`Объём`[ind])
+      label <- ""
+      if (metall_data$`Операция`[ind] == "Экспорт") {
+        #подсчитываем долю эспорта региона из суммарного экспорта
+        percent <- round(amount/sum_export*100, 1)
+                label <- paste0("                                                                       ", as.character(amount), " (", as.character(percent), " %)")
+        }
+      else {
+        #подсчитываем долю импорта региона из суммарного импорта
+        percent <- round(amount/sum_import*100, 1)
+        #в нужном формате заносим в переменную label объем и долю с помощью paste0 
+        label = paste0(as.character(amount), " (", as.character(percent), " %)")
+        #разворачиваем диаграмму с импортом для более наглядного отображения
+        metall_data$`Объём`[ind] <<- -amount
+      }
+      percents <- c(percents, label)
+      ind <- ind + 1
+    }
+    return(percents)
+  }
+  
+  #отбираем все данные для металлургической промышленности
+  metall_data <- tidy_data %>% filter(Груз=="Металлургический")
+  replace_NA_by_null()
+  percents <- get_percents_and_reverse_import()
+   #создаем переменную типа ggplot, отвечающую за построение графика, указываем что будем использовать за данные в графике, и какие столбцы будут изображены на осях
+  my_plot <- ggplot(data=metall_data, aes(x=`Регион`,
+                                          y=as.numeric(metall_data$`Объём`),
+                                          fill=`Операция`,
+                                          percents=percents))
+  #задаем такое условие, чтобы при регулировки горизонтального положения графика у нас сохранялось вертикальное
+  my_plot <- my_plot + geom_col(position="Dodge")
+  #задаем названия и цвета столбцам гистограммы
+  my_plot <- my_plot + scale_fill_manual(labels = c("Импорт", "Экспорт"), values = c("blue", "orange"))
+  #задаем названия графику и осям координат 
+  my_plot <- my_plot + labs(title="Суммарный экспорт и импорт металлургической продукции в субъектах РФ",
+                            x="Субъект РФ",
+                            y="Объем, млн долл. США")
+  #создаем подписи к столбцам гистограммы и выравниваем их на нужный уровень
+  my_plot <- my_plot + geom_text(aes(label=percents), nudge_y=-1000)
+  #поворачиваем график для более удобного отображения даннных
+  my_plot <- my_plot + coord_flip()
+  return(my_plot)
+}
+
+tidy_data <- get_tidy_data()
+```
+
+
+Results plot 1:
+```{r, error=FALSE, message=FALSE, warning=FALSE, fig.width=12, fig.height=25}
+my_chart_1(tidy_data)
+```
+Results plot 2:
+```{r, error=FALSE, message=FALSE, warning=FALSE, fig.width=19, fig.height=28}
+my_chart_2(tidy_data)
+```
+
